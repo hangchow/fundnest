@@ -15,29 +15,38 @@ struct SettingsView: View {
                     SectionTitle("应用偏好")
 
                     VStack(spacing: 0) {
-                        HStack {
+                        HStack(spacing: 18) {
                             Text("默认货币")
                                 .font(.system(size: 24, weight: .bold))
-                            Spacer()
+                                .foregroundStyle(Color.ink)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
                             CurrencyPicker(selection: Binding(
                                 get: { appState.settings.defaultCurrency },
                                 set: { appState.setDefaultCurrency($0) }
                             ))
                         }
-                        .frame(height: 72)
+                        .padding(.vertical, 14)
 
                         Divider()
 
-                        HStack(alignment: .center) {
-                            VStack(alignment: .leading, spacing: 8) {
+                        HStack(alignment: .center, spacing: 18) {
+                            VStack(alignment: .leading, spacing: 10) {
                                 Text("货币汇率")
                                     .font(.system(size: 24, weight: .bold))
-                                Text("上次刷新：\(lastRefreshText)")
-                                    .font(.system(size: 17, weight: .medium))
-                                    .foregroundStyle(Color.secondaryText)
-                            }
+                                    .foregroundStyle(Color.ink)
 
-                            Spacer()
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("汇率加载时间：")
+                                    Text(lastRefreshText)
+                                }
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.82)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundStyle(Color.secondaryText)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
                             Button {
                                 Task { await appState.refreshRates() }
@@ -47,12 +56,14 @@ struct SettingsView: View {
                                     systemImage: "arrow.clockwise"
                                 )
                                 .font(.system(size: 20, weight: .bold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.82)
                             }
                             .buttonStyle(.plain)
                             .foregroundStyle(Color.brandBlue)
                             .disabled(appState.isRefreshingRates)
                         }
-                        .frame(height: 94)
+                        .padding(.vertical, 16)
                     }
                     .padding(.horizontal, 18)
                     .background(.white)
