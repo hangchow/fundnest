@@ -53,6 +53,15 @@ final class FundnestAppState: ObservableObject {
         persist()
     }
 
+    func reorderProjects(matching orderedIDs: [Project.ID]) {
+        let projectsByID = Dictionary(uniqueKeysWithValues: projects.map { ($0.id, $0) })
+        var reordered = orderedIDs.compactMap { projectsByID[$0] }
+        let orderedIDSet = Set(orderedIDs)
+        reordered.append(contentsOf: projects.filter { !orderedIDSet.contains($0.id) })
+        projects = reordered
+        persist()
+    }
+
     func setDefaultCurrency(_ currency: Currency) {
         settings.defaultCurrency = currency
         persist()

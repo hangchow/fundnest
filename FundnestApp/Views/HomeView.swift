@@ -1,8 +1,11 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct HomeView: View {
     @EnvironmentObject private var appState: FundnestAppState
     @State private var path: [Route] = []
+    @State private var orderedProjects: [Project] = []
+    @State private var draggingProject: Project?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -10,9 +13,25 @@ struct HomeView: View {
                 AppBackground()
 
                 ScrollView {
-                    VStack(spacing: 24) {
-                        HStack {
-                            Spacer()
+                    VStack(spacing: 20) {
+                        HStack(spacing: 18) {
+                            Button {
+                                let id = appState.addProject()
+                                path.append(.project(id))
+                            } label: {
+                                Image(systemName: "plus")
+                                    .font(.title2.weight(.semibold))
+                                    .foregroundStyle(Color.brandBlue)
+                                    .frame(width: 58, height: 58)
+                                    .background(.white)
+                                    .clipShape(Circle())
+                                    .softShadow()
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("新建项目")
+
+                            Spacer(minLength: 0)
+
                             NavigationLink(value: Route.settings) {
                                 Image(systemName: "gearshape")
                                     .font(.title2.weight(.semibold))
@@ -25,16 +44,8 @@ struct HomeView: View {
                             .accessibilityLabel("设置")
                         }
 
-                        Button {
-                            let id = appState.addProject()
-                            path.append(.project(id))
-                        } label: {
-                            NewProjectCard()
-                        }
-                        .buttonStyle(.plain)
-
                         LazyVStack(spacing: 16) {
-                            ForEach(appState.projects) { project in
+                            ForEach(orderedProjects) { project in
                                 NavigationLink(value: Route.project(project.id)) {
                                     ProjectRow(
                                         name: project.name,
@@ -43,6 +54,19 @@ struct HomeView: View {
                                     )
                                 }
                                 .buttonStyle(.plain)
+                                .onDrag {
+                                    draggingProject = project
+                                    return NSItemProvider(object: project.id.uuidString as NSString)
+                                }
+                                .onDrop(
+                                    of: [UTType.text],
+                                    delegate: ProjectDropDelegate(
+                                        targetProject: project,
+                                        projects: $orderedProjects,
+                                        draggingProject: $draggingProject,
+                                        onDropCompleted: persistProjectOrder
+                                    )
+                                )
                             }
                         }
                     }
@@ -50,6 +74,12 @@ struct HomeView: View {
                     .padding(.top, 78)
                     .padding(.bottom, 32)
                 }
+            }
+            .onAppear {
+                orderedProjects = appState.projects
+            }
+            .onChange(of: appState.projects) { nextProjects in
+                orderedProjects = nextProjects
             }
             .navigationDestination(for: Route.self) { route in
                 switch route {
@@ -66,47 +96,16 @@ struct HomeView: View {
             .toolbar(.hidden, for: .navigationBar)
         }
     }
+
+    private func persistProjectOrder() {
+        draggingProject = nil
+        appState.reorderProjects(matching: orderedProjects.map(\.id))
+    }
 }
 
 private enum Route: Hashable {
     case settings
     case project(Project.ID)
-}
-
-private struct NewProjectCard: View {
-    var body: some View {
-        HStack(spacing: 22) {
-            Image(systemName: "plus")
-                .font(.system(size: 42, weight: .regular))
-                .foregroundStyle(Color.brandBlue)
-                .frame(width: 86, height: 86)
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-
-            Text("新建项目")
-                .font(.system(size: 34, weight: .bold))
-                .foregroundStyle(.white)
-
-            Spacer()
-
-            Image("NestBird")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 140, height: 110)
-                .accessibilityHidden(true)
-        }
-        .padding(.horizontal, 28)
-        .frame(height: 140)
-        .background(
-            LinearGradient(
-                colors: [.brandBlue.opacity(0.55), .brandBlue],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .softShadow()
-    }
 }
 
 private struct ProjectRow: View {
@@ -138,6 +137,38 @@ private struct ProjectRow: View {
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .softShadow()
+    }
+}
+
+private struct ProjectDropDelegate: DropDelegate {
+    let targetProject: Project
+    @Binding var projects: [Project]
+    @Binding var draggingProject: Project?
+    let onDropCompleted: () -> Void
+
+    func dropEntered(info: DropInfo) {
+        guard
+            let draggingProject,
+            draggingProject.id != targetProject.id,
+            let sourceIndex = projects.firstIndex(where: { $0.id == draggingProject.id }),
+            let targetIndex = projects.firstIndex(where: { $0.id == targetProject.id })
+        else {
+            return
+        }
+
+        withAnimation(.snappy(duration: 0.18)) {
+            let item = projects.remove(at: sourceIndex)
+            projects.insert(item, at: targetIndex)
+        }
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        onDropCompleted()
+        return true
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
     }
 }
 
