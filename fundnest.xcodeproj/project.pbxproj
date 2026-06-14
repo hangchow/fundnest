@@ -30,6 +30,7 @@
 
 /* Begin PBXFileReference section */
 		100000000000000000000020 /* Fundnest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fundnest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000114 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		100000000000000000000101 /* FundnestApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundnestApp.swift; sourceTree = "<group>"; };
 		100000000000000000000102 /* FundnestAppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundnestAppState.swift; sourceTree = "<group>"; };
 		100000000000000000000103 /* SnapshotPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotPersistence.swift; sourceTree = "<group>"; };
@@ -65,6 +66,7 @@
 		100000000000000000000040 = {
 			isa = PBXGroup;
 			children = (
+				100000000000000000000047 /* Config */,
 				100000000000000000000041 /* FundnestApp */,
 				100000000000000000000045 /* Sources */,
 				100000000000000000000046 /* Products */,
@@ -134,6 +136,14 @@
 				100000000000000000000020 /* Fundnest.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		100000000000000000000047 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000114 /* Signing.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -346,12 +356,12 @@
 		};
 		100000000000000000000082 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 100000000000000000000114 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Fundnest;
@@ -375,12 +385,12 @@
 		};
 		100000000000000000000083 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 100000000000000000000114 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Fundnest;
