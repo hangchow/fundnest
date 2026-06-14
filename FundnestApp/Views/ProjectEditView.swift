@@ -7,11 +7,20 @@ struct ProjectEditView: View {
     @State private var draft: Project
     @State private var isShowingDeleteConfirmation = false
 
+    let allowsDelete: Bool
+    let onSave: (Project) -> Void
     let onDelete: () -> Void
 
-    init(project: Project, onDelete: @escaping () -> Void = {}) {
+    init(
+        project: Project,
+        allowsDelete: Bool = true,
+        onDelete: @escaping () -> Void = {},
+        onSave: @escaping (Project) -> Void = { _ in }
+    ) {
         _draft = State(initialValue: project)
+        self.allowsDelete = allowsDelete
         self.onDelete = onDelete
+        self.onSave = onSave
     }
 
     var body: some View {
@@ -46,16 +55,21 @@ struct ProjectEditView: View {
                         selectedCurrency: $draft.summaryCurrency
                     )
 
-                    EditableAccountTable(project: $draft)
+                    EditableAccountTable(
+                        project: $draft,
+                        defaultAccountCurrency: appState.settings.defaultCurrency
+                    )
 
-                    Button(role: .destructive) {
-                        isShowingDeleteConfirmation = true
-                    } label: {
-                        Text("删除项目")
-                            .font(.system(size: 20, weight: .bold))
+                    if allowsDelete {
+                        Button(role: .destructive) {
+                            isShowingDeleteConfirmation = true
+                        } label: {
+                            Text("删除项目")
+                                .font(.system(size: 20, weight: .bold))
+                        }
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.trailing, 16)
                     }
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.trailing, 16)
                 }
                 .padding(.horizontal, 22)
                 .padding(.top, 68)
@@ -85,7 +99,8 @@ struct ProjectEditView: View {
         draft.accounts.removeAll {
             $0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && $0.amount == 0
         }
-        appState.updateProject(draft)
+        appState.saveProject(draft)
+        onSave(draft)
         dismiss()
     }
 
@@ -97,6 +112,7 @@ struct ProjectEditView: View {
 
 private struct EditableAccountTable: View {
     @Binding var project: Project
+    let defaultAccountCurrency: Currency
 
     var body: some View {
         VStack(spacing: 0) {
@@ -155,7 +171,7 @@ private struct EditableAccountTable: View {
                     AccountEntry(
                         name: "",
                         amount: 0,
-                        currency: project.summaryCurrency
+                        currency: defaultAccountCurrency
                     )
                 )
             } label: {

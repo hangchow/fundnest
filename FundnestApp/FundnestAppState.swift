@@ -25,26 +25,26 @@ final class FundnestAppState: ObservableObject {
         exchangeRates = snapshot.exchangeRates
     }
 
-    func addProject() -> Project.ID {
-        let project = Project(
+    func makeProjectDraft() -> Project {
+        Project(
             name: "新建项目",
             summaryCurrency: settings.defaultCurrency,
             accounts: [
                 AccountEntry(name: "账户", amount: 0, currency: settings.defaultCurrency)
             ]
         )
-        projects.insert(project, at: 0)
-        persist()
-        return project.id
     }
 
-    func updateProject(_ project: Project) {
-        guard let index = projects.firstIndex(where: { $0.id == project.id }) else {
-            return
-        }
+    func saveProject(_ project: Project) {
         var nextProject = project
         nextProject.touch()
-        projects[index] = nextProject
+
+        if let index = projects.firstIndex(where: { $0.id == project.id }) {
+            projects[index] = nextProject
+        } else {
+            projects.insert(nextProject, at: 0)
+        }
+
         persist()
     }
 

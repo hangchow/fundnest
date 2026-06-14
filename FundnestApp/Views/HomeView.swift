@@ -6,6 +6,7 @@ struct HomeView: View {
     @State private var path: [Route] = []
     @State private var orderedProjects: [Project] = []
     @State private var draggingProject: Project?
+    @State private var newProjectDraft: Project?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -16,8 +17,9 @@ struct HomeView: View {
                     VStack(spacing: 20) {
                         HStack(spacing: 18) {
                             Button {
-                                let id = appState.addProject()
-                                path.append(.project(id))
+                                let draft = appState.makeProjectDraft()
+                                newProjectDraft = draft
+                                path.append(.projectEditor(draft.id))
                             } label: {
                                 Image(systemName: "plus")
                                     .font(.title2.weight(.semibold))
@@ -91,6 +93,22 @@ struct HomeView: View {
                     } else {
                         MissingProjectView()
                     }
+                case .projectEditor(let id):
+                    if let draft = newProjectDraft, draft.id == id {
+                        ProjectEditView(
+                            project: draft,
+                            allowsDelete: false,
+                            onSave: { savedProject in
+                                if newProjectDraft?.id == savedProject.id {
+                                    newProjectDraft = nil
+                                }
+                            }
+                        )
+                    } else if let project = appState.projects.first(where: { $0.id == id }) {
+                        ProjectEditView(project: project)
+                    } else {
+                        MissingProjectView()
+                    }
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
@@ -106,6 +124,7 @@ struct HomeView: View {
 private enum Route: Hashable {
     case settings
     case project(Project.ID)
+    case projectEditor(Project.ID)
 }
 
 private struct ProjectRow: View {
