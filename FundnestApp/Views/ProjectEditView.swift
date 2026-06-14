@@ -5,9 +5,13 @@ struct ProjectEditView: View {
     @EnvironmentObject private var appState: FundnestAppState
 
     @State private var draft: Project
+    @State private var isShowingDeleteConfirmation = false
 
-    init(project: Project) {
+    let onDelete: () -> Void
+
+    init(project: Project, onDelete: @escaping () -> Void = {}) {
         _draft = State(initialValue: project)
+        self.onDelete = onDelete
     }
 
     var body: some View {
@@ -43,6 +47,15 @@ struct ProjectEditView: View {
                     )
 
                     EditableAccountTable(project: $draft)
+
+                    Button(role: .destructive) {
+                        isShowingDeleteConfirmation = true
+                    } label: {
+                        Text("删除项目")
+                            .font(.system(size: 20, weight: .bold))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.trailing, 16)
                 }
                 .padding(.horizontal, 22)
                 .padding(.top, 68)
@@ -50,6 +63,18 @@ struct ProjectEditView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .confirmationDialog(
+            "确认删除这个项目？",
+            isPresented: $isShowingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("删除项目", role: .destructive) {
+                deleteProject()
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("删除后无法恢复。")
+        }
     }
 
     private func save() {
@@ -62,6 +87,11 @@ struct ProjectEditView: View {
         }
         appState.updateProject(draft)
         dismiss()
+    }
+
+    private func deleteProject() {
+        appState.deleteProject(id: draft.id)
+        onDelete()
     }
 }
 

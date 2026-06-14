@@ -46,7 +46,10 @@ struct ProjectDetailView: View {
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $isEditing) {
             NavigationStack {
-                ProjectEditView(project: currentProject)
+                ProjectEditView(project: currentProject) {
+                    isEditing = false
+                    dismiss()
+                }
             }
             .presentationDetents([.large])
         }
