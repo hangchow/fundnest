@@ -70,19 +70,33 @@ private struct EditableAccountTable: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 0) {
-                GridRow {
+            VStack(spacing: 0) {
+                HStack(spacing: 8) {
+                    Color.clear
+                        .frame(width: 34)
                     HeaderCell("账户")
                     HeaderCell("金额")
+                        .frame(width: 78, alignment: .leading)
                     HeaderCell("货币")
+                        .frame(width: 94, alignment: .leading)
                 }
                 .frame(height: 58)
 
                 Divider()
-                    .gridCellColumns(3)
 
                 ForEach($project.accounts) { $account in
-                    GridRow {
+                    HStack(spacing: 8) {
+                        Button {
+                            project.accounts.removeAll { $0.id == account.id }
+                        } label: {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.title2.weight(.semibold))
+                                .foregroundStyle(Color.brandBlue)
+                                .frame(width: 34, height: 44)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("删除账户")
+
                         TextField("账户", text: $account.name)
                             .textFieldStyle(.roundedBorder)
                             .font(.system(size: 20))
@@ -95,8 +109,10 @@ private struct EditableAccountTable: View {
                         .keyboardType(.decimalPad)
                         .textFieldStyle(.roundedBorder)
                         .font(.system(size: 20))
+                        .frame(width: 78)
 
-                        CurrencyPicker(selection: $account.currency)
+                        CompactCurrencyPicker(selection: $account.currency)
+                            .frame(width: 94)
                     }
                     .frame(height: 76)
                 }
@@ -113,10 +129,16 @@ private struct EditableAccountTable: View {
                     )
                 )
             } label: {
-                Label("添加账户", systemImage: "plus")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
+                HStack(spacing: 8) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title2.weight(.semibold))
+                    Text("添加账户")
+                        .font(.headline)
+                    Spacer(minLength: 0)
+                }
+                .font(.headline)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
             }
             .buttonStyle(.plain)
             .foregroundStyle(Color.brandBlue)
@@ -124,5 +146,37 @@ private struct EditableAccountTable: View {
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .softShadow()
+    }
+}
+
+private struct CompactCurrencyPicker: View {
+    @Binding var selection: Currency
+
+    var body: some View {
+        Menu {
+            ForEach(Currency.allCases) { currency in
+                Button(currency.localizedName) {
+                    selection = currency
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(selection.localizedName)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2.weight(.bold))
+            }
+            .font(.system(size: 18, weight: .bold))
+            .foregroundStyle(Color.ink)
+            .padding(.horizontal, 8)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .background(.white)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(Color.border, lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
     }
 }
