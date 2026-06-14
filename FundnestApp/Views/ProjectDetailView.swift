@@ -21,25 +21,11 @@ struct ProjectDetailView: View {
                         title: currentProject.name,
                         leading: .back { dismiss() },
                         trailing: {
-                            HStack(spacing: 18) {
-                                Button {
-                                    addAccount()
-                                } label: {
-                                    Image(systemName: "plus")
-                                        .font(.title.weight(.regular))
-                                        .frame(width: 58, height: 58)
-                                        .background(.white)
-                                        .clipShape(Circle())
-                                        .softShadow()
-                                }
-                                .buttonStyle(.plain)
-
-                                Button("编辑") {
-                                    isEditing = true
-                                }
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundStyle(Color.brandBlue)
+                            Button("编辑") {
+                                isEditing = true
                             }
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundStyle(Color.brandBlue)
                         }
                     )
 
@@ -64,19 +50,6 @@ struct ProjectDetailView: View {
             }
             .presentationDetents([.large])
         }
-    }
-
-    private func addAccount() {
-        var next = currentProject
-        next.accounts.append(
-            AccountEntry(
-                name: "新账户",
-                amount: 0,
-                currency: next.summaryCurrency
-            )
-        )
-        appState.updateProject(next)
-        isEditing = true
     }
 }
 
